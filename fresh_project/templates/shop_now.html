@@ -1,0 +1,157 @@
+{% extends 'customer_base.html' %}
+
+{% block title %}Shop - Fresh Farm System{% endblock %}
+{% block nav_home_active %}active{% endblock %}
+{% block page_title %}Shop{% endblock %}
+{% block page_subtitle %}Browse fresh vegetables and fruits by the kilo{% endblock %}
+
+{% block content %}
+    <div class="page-header">
+        <h1>🛒 Shop Fresh Products</h1>
+        <p>All items are sold per kilo. Choose from our freshest vegetables and fruits.</p>
+    </div>
+
+    <div class="toolbar">
+        <form method="get" style="display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap;">
+            <input type="text" class="search-input" name="q" value="{{ query }}" placeholder="Search products">
+            <input type="hidden" name="category" value="{{ category_filter }}">
+        </form>
+        <div class="pill-filters">
+            <a href="?category=all{% if query %}&q={{ query }}{% endif %}"
+               class="pill pill-category{% if category_filter == 'all' %} active{% endif %}">All</a>
+            <a href="?category=fruits{% if query %}&q={{ query }}{% endif %}"
+               class="pill pill-category{% if category_filter == 'fruits' %} active{% endif %}">Fruits</a>
+            <a href="?category=vegetables{% if query %}&q={{ query }}{% endif %}"
+               class="pill pill-category{% if category_filter == 'vegetables' %} active{% endif %}">Vegetables</a>
+        </div>
+        <a href="{% url 'cart_view' %}" class="btn btn-outline btn-small">View cart</a>
+    </div>
+    {% if products %}
+        <div class="card-grid">
+            {% for product in products %}
+                <article class="card">
+                    <div class="card-header">
+                        <div>
+                            <h2 class="card-title">{{ product.name }}</h2>
+                            <p class="muted-text">{{ product.category }}</p>
+                        </div>
+                    </div>
+
+                    <p class="muted-text">₱{{ product.price|floatformat:2 }} per kg</p>
+                    <p class="muted-text">Available: {{ product.stock_quantity }} kg</p>
+
+                    <div class="toolbar" style="margin-top: 0.75rem;">
+                        <form method="post" action="/cart/add/{{ product.id }}/" class="add-to-cart-form">
+                            {% csrf_token %}
+                            <button type="submit"
+                                    class="btn btn-primary btn-small add-to-cart-btn"
+                                    data-product-name="{{ product.name }}"
+                                    data-product-price="{{ product.price|floatformat:2 }}">
+                                Add to cart
+                            </button>
+                        </form>
+                    </div>
+                </article>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p class="muted-text">No products available right now. Please check back later.</p>
+    {% endif %}
+
+    {% if page_obj and page_obj.paginator.num_pages > 1 %}
+        <div class="toolbar" style="margin-top: 1.5rem; justify-content: center;">
+            {% if page_obj.has_previous %}
+                <a href="?page={{ page_obj.previous_page_number }}{% if query %}&q={{ query }}{% endif %}{% if category_filter %}&category={{ category_filter }}{% endif %}"
+                   class="btn btn-outline btn-small">Prev</a>
+            {% endif %}
+
+            {% for num in page_obj.paginator.page_range %}
+                {% if num == page_obj.number %}
+                    <span class="btn btn-primary btn-small">{{ num }}</span>
+                {% else %}
+                    <a href="?page={{ num }}{% if query %}&q={{ query }}{% endif %}{% if category_filter %}&category={{ category_filter }}{% endif %}"
+                       class="btn btn-outline btn-small">{{ num }}</a>
+                {% endif %}
+            {% endfor %}
+
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}{% if query %}&q={{ query }}{% endif %}{% if category_filter %}&category={{ category_filter }}{% endif %}"
+                   class="btn btn-outline btn-small">Next</a>
+            {% endif %}
+        </div>
+    {% endif %}
+
+    <!-- Add to Cart Confirmation Modal -->
+    <div id="add-to-cart-modal" style="display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.4); z-index: 1000; align-items: center; justify-content: center;">
+        <div style="background: #ffffff; border-radius: 8px; padding: 1.5rem; max-width: 400px; width: 90%; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);">
+            <h2 style="margin-top: 0; margin-bottom: 0.75rem; font-size: 1.15rem;">Add to cart</h2>
+            <p class="muted-text" style="margin-bottom: 0.5rem;">Do you want to add this product to your cart?</p>
+            <p style="margin-bottom: 0.75rem;"><strong id="modal-product-name"></strong></p>
+            <p class="muted-text" style="margin-bottom: 1rem;">Price: ₱<span id="modal-product-price"></span> per kg</p>
+            <div class="toolbar" style="justify-content: flex-end; gap: 0.5rem;">
+                <button type="button" class="btn btn-outline btn-small" id="modal-cancel-btn">Cancel</button>
+                <button type="button" class="btn btn-primary btn-small" id="modal-confirm-btn">Add to cart</button>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    (function () {
+        var modal = document.getElementById('add-to-cart-modal');
+        var modalProductName = document.getElementById('modal-product-name');
+        var modalProductPrice = document.getElementById('modal-product-price');
+        var cancelBtn = document.getElementById('modal-cancel-btn');
+        var confirmBtn = document.getElementById('modal-confirm-btn');
+        var pendingForm = null;
+
+        var buttons = document.querySelectorAll('.add-to-cart-btn');
+        buttons.forEach(function (btn) {
+            btn.addEventListener('click', function (e) {
+                if (e && e.preventDefault) {
+                    e.preventDefault();
+                }
+                var name = this.getAttribute('data-product-name') || '';
+                var price = this.getAttribute('data-product-price') || '';
+                modalProductName.textContent = name;
+                modalProductPrice.textContent = price;
+                pendingForm = this.closest('form');
+                if (modal) {
+                    modal.style.display = 'flex';
+                }
+            });
+        });
+
+        function closeModal() {
+            if (modal) {
+                modal.style.display = 'none';
+            }
+            pendingForm = null;
+        }
+
+        if (cancelBtn) {
+            cancelBtn.addEventListener('click', function () {
+                closeModal();
+            });
+        }
+
+        if (confirmBtn) {
+            confirmBtn.addEventListener('click', function () {
+                if (pendingForm) {
+                    pendingForm.submit();
+                }
+                closeModal();
+            });
+        }
+
+        if (modal) {
+            modal.addEventListener('click', function (e) {
+                if (e.target === modal) {
+                    closeModal();
+                }
+            });
+        }
+    })();
+</script>
+{% endblock %}

@@ -1,0 +1,176 @@
+{% extends 'customer_base.html' %}
+
+{% block title %}Checkout - Fresh Farm System{% endblock %}
+{% block page_title %}Checkout{% endblock %}
+{% block page_subtitle %}Confirm your delivery details and payment{% endblock %}
+
+{% block content %}
+    <div class="page-header">
+        <h1>🧾 Checkout</h1>
+        <p>Review your order, choose delivery and payment, then place your order.</p>
+    </div>
+
+    <section class="card" style="margin-bottom: 1.5rem;">
+        <div class="card-header">
+            <h2 class="card-title">Customer & delivery</h2>
+        </div>
+        <div class="table-wrapper" style="padding: 0.5rem 0.25rem;">
+            <p><strong>Customer:</strong> {{ user.first_name }} {{ user.last_name }} ({{ user.username }})</p>
+            {% if user.email %}
+                <p class="muted-text"><strong>Email:</strong> {{ user.email }}</p>
+            {% endif %}
+
+            <div style="margin-top: 0.75rem;">
+                <p><strong>Delivery address</strong> <span class="muted-text">(required for Deliver option)</span></p>
+                <textarea name="delivery_address" rows="2" style="width: 100%; padding: 0.4rem; border-radius: 6px; border: 1px solid #d0d0d0; resize: vertical;"></textarea>
+            </div>
+        </div>
+    </section>
+
+    <form method="post" action="{% url 'cart_checkout' %}">
+        {% csrf_token %}
+        <section class="card" style="margin-bottom: 1.5rem;">
+            <div class="card-header">
+                <h2 class="card-title">Delivery & payment</h2>
+            </div>
+            <div style="display: grid; gap: 1rem;">
+                <div>
+                    <p><strong>Delivery option</strong></p>
+                    <label style="display: block; margin-bottom: 0.25rem;">
+                        <input type="radio" name="delivery_method" value="pickup" id="delivery-pickup"
+                               {% if delivery_method == 'pickup' %}checked{% endif %}> Pick-up
+                    </label>
+                    <label style="display: block;">
+                        <input type="radio" name="delivery_method" value="deliver" id="delivery-deliver"
+                               {% if delivery_method == 'deliver' %}checked{% endif %}> Deliver
+                    </label>
+                </div>
+
+                <div>
+                    <p><strong>Payment option</strong></p>
+                    <label style="display: block; margin-bottom: 0.25rem;">
+                        <input type="radio" name="payment_method" value="over_counter" id="payment-counter"
+                               {% if payment_method == 'over_counter' %}checked{% endif %}> Over the counter
+                    </label>
+                    <label style="display: block;">
+                        <input type="radio" name="payment_method" value="cod" id="payment-cod"
+                               {% if payment_method == 'cod' %}checked{% endif %}> Cash on delivery
+                    </label>
+                    <p class="muted-text" style="margin-top: 0.5rem;">
+                        If you choose <strong>Pick-up</strong>, payment is automatically <strong>Over the counter</strong>.<br>
+                        If you choose <strong>Cash on delivery</strong>, delivery is automatically <strong>Deliver</strong>.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <section class="card">
+            <div class="card-header">
+                <h2 class="card-title">Order summary</h2>
+            </div>
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Product</th>
+                            <th>Quantity (kg)</th>
+                            <th>Price / kg</th>
+                            <th>Subtotal</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in cart_items %}
+                            <tr>
+                                <td>{{ item.product.name }}</td>
+                                <td>{{ item.quantity }}</td>
+                                <td>₱{{ item.product.price|floatformat:2 }}</td>
+                                <td>₱{{ item.subtotal|default:0|floatformat:2 }}</td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="4" class="muted-text">Your cart is empty.</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="page-header" style="margin-top: 1rem;">
+                <p class="muted-text">
+                    Subtotal: <strong>₱{{ cart_total|default:0|floatformat:2 }}</strong><br>
+                    Delivery fee: <strong id="delivery-fee" data-base-fee="{{ delivery_fee_amount|default:20 }}">₱{{ delivery_fee|default:0|floatformat:2 }}</strong><br>
+                    Grand total: <strong id="grand-total" data-subtotal="{{ cart_total|default:0|floatformat:2 }}">₱{{ grand_total|default:0|floatformat:2 }}</strong>
+                </p>
+            </div>
+
+            <div class="toolbar" style="margin-top: 1rem;">
+                <a href="{% url 'cart_view' %}" class="btn btn-outline btn-small">Back to cart</a>
+                <button type="submit" class="btn btn-primary btn-small">Place order</button>
+            </div>
+        </section>
+    </form>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    (function () {
+        var deliveryPickup = document.getElementById('delivery-pickup');
+        var deliveryDeliver = document.getElementById('delivery-deliver');
+        var paymentCounter = document.getElementById('payment-counter');
+        var paymentCod = document.getElementById('payment-cod');
+        var deliveryFeeEl = document.getElementById('delivery-fee');
+        var grandTotalEl = document.getElementById('grand-total');
+
+        if (!deliveryFeeEl || !grandTotalEl) {
+            return;
+        }
+
+        var baseFee = parseFloat(deliveryFeeEl.getAttribute('data-base-fee') || '20');
+        var subtotal = parseFloat(grandTotalEl.getAttribute('data-subtotal') || '0');
+
+        function updateState() {
+            var delivery = deliveryDeliver && deliveryDeliver.checked ? 'deliver' : 'pickup';
+            var payment = paymentCod && paymentCod.checked ? 'cod' : 'over_counter';
+
+            if (delivery === 'pickup') {
+                if (paymentCounter) {
+                    paymentCounter.checked = true;
+                }
+                if (paymentCod) {
+                    paymentCod.disabled = true;
+                    paymentCod.checked = false;
+                }
+            } else {
+                if (paymentCod) {
+                    paymentCod.disabled = false;
+                }
+                if (paymentCod && paymentCod.checked) {
+                    delivery = 'deliver';
+                    if (deliveryDeliver) {
+                        deliveryDeliver.checked = true;
+                    }
+                }
+            }
+
+            var fee = delivery === 'deliver' ? baseFee : 0;
+            deliveryFeeEl.textContent = '₱' + fee.toFixed(2);
+            grandTotalEl.textContent = '₱' + (subtotal + fee).toFixed(2);
+        }
+
+        if (deliveryPickup) {
+            deliveryPickup.addEventListener('change', updateState);
+        }
+        if (deliveryDeliver) {
+            deliveryDeliver.addEventListener('change', updateState);
+        }
+        if (paymentCounter) {
+            paymentCounter.addEventListener('change', updateState);
+        }
+        if (paymentCod) {
+            paymentCod.addEventListener('change', updateState);
+        }
+
+        updateState();
+    })();
+</script>
+{% endblock %}

@@ -1,0 +1,123 @@
+{% extends 'admin_base.html' %}
+
+{% block title %}Admin Dashboard - Fresh Farm System{% endblock %}
+{% block nav_dashboard_active %}active{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+{% block page_subtitle %}Today’s key numbers and recent orders{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Today at a glance</h1>
+    <p>Quick overview of sales, orders, and items that need attention.</p>
+</div>
+
+<section class="stats-grid">
+    <article class="stat-card">
+        <div class="stat-label">Today’s Sales</div>
+        <div class="stat-value">₱12,450</div>
+        <div class="stat-sub">vs ₱11,800 yesterday</div>
+    </article>
+
+    <article class="stat-card">
+        <div class="stat-label">Total Orders Today</div>
+        <div class="stat-value">32</div>
+        <div class="stat-sub">4 new customers</div>
+    </article>
+
+    <article class="stat-card">
+        <div class="stat-label">Pending Orders</div>
+        <div class="stat-value">7</div>
+        <div class="stat-sub">Waiting for preparation</div>
+    </article>
+
+    <article class="stat-card">
+        <div class="stat-label">Low-stock items</div>
+        <div class="stat-value">5</div>
+        <div class="stat-sub">Restock before tomorrow</div>
+    </article>
+</section>
+
+<section class="split" style="margin-top: 1.5rem;">
+    <article class="card">
+        <div class="card-header">
+            <h2 class="card-title">Sales (last 7 days)</h2>
+            <span class="card-meta">Mini chart</span>
+        </div>
+        <div class="chart-placeholder">
+            <div class="chart-bar" style="height: 40%;"></div>
+            <div class="chart-bar" style="height: 55%;"></div>
+            <div class="chart-bar" style="height: 50%;"></div>
+            <div class="chart-bar" style="height: 70%;"></div>
+            <div class="chart-bar" style="height: 65%;"></div>
+            <div class="chart-bar" style="height: 80%;"></div>
+            <div class="chart-bar" style="height: 75%;"></div>
+        </div>
+        <div class="chart-axis">
+            <span>Mon</span>
+            <span>Tue</span>
+            <span>Wed</span>
+            <span>Thu</span>
+            <span>Fri</span>
+            <span>Sat</span>
+            <span>Sun</span>
+        </div>
+    </article>
+
+    <article class="card">
+        <div class="card-header">
+            <h2 class="card-title">Recent 5 orders</h2>
+            <span class="card-meta">Newest first</span>
+        </div>
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Customer</th>
+                        <th>Total</th>
+                        <th>Status</th>
+                        <th>Placed</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>#1245</td>
+                        <td>Juan D.</td>
+                        <td>₱850</td>
+                        <td><span class="badge badge-warning">Pending</span></td>
+                        <td>5 mins ago</td>
+                    </tr>
+                    <tr>
+                        <td>#1244</td>
+                        <td>Maria S.</td>
+                        <td>₱1,250</td>
+                        <td><span class="badge badge-info">Out for delivery</span></td>
+                        <td>18 mins ago</td>
+                    </tr>
+                    <tr>
+                        <td>#1243</td>
+                        <td>Carlos R.</td>
+                        <td>₱640</td>
+                        <td><span class="badge badge-success">Completed</span></td>
+                        <td>40 mins ago</td>
+                    </tr>
+                    <tr>
+                        <td>#1242</td>
+                        <td>Ana L.</td>
+                        <td>₱420</td>
+                        <td><span class="badge badge-success">Completed</span></td>
+                        <td>1 hr ago</td>
+                    </tr>
+                    <tr>
+                        <td>#1241</td>
+                        <td>Mark P.</td>
+                        <td>₱1,050</td>
+                        <td><span class="badge badge-danger">Cancelled</span></td>
+                        <td>2 hrs ago</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </article>
+</section>
+{% endblock %}

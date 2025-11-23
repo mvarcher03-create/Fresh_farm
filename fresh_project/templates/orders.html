@@ -1,0 +1,93 @@
+{% extends 'admin_base.html' %}
+
+{% block title %}Orders - Fresh Farm Admin{% endblock %}
+{% block nav_orders_active %}active{% endblock %}
+{% block page_title %}Orders{% endblock %}
+{% block page_subtitle %}View orders and keep statuses simple and clear{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Orders</h1>
+    <p>See all orders and update their status in a few clicks.</p>
+</div>
+
+<div class="toolbar">
+    <div class="pill-filters">
+        <a href="{% url 'admin_orders' %}?status=all" class="pill{% if status_filter == 'all' %} active{% endif %}">All</a>
+        <a href="{% url 'admin_orders' %}?status=pending" class="pill{% if status_filter == 'pending' %} active{% endif %}">Pending</a>
+        <a href="{% url 'admin_orders' %}?status=preparing" class="pill{% if status_filter == 'preparing' %} active{% endif %}">Preparing</a>
+        <a href="{% url 'admin_orders' %}?status=out_for_delivery" class="pill{% if status_filter == 'out_for_delivery' %} active{% endif %}">Out for delivery</a>
+        <a href="{% url 'admin_orders' %}?status=completed" class="pill{% if status_filter == 'completed' %} active{% endif %}">Completed</a>
+        <a href="{% url 'admin_orders' %}?status=cancelled" class="pill{% if status_filter == 'cancelled' %} active{% endif %}">Cancelled</a>
+    </div>
+    <a href="{% url 'admin_orders' %}" class="btn btn-primary">View all orders</a>
+</div>
+
+<div class="table-wrapper">
+    <table>
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Customer</th>
+                <th>Items</th>
+                <th>Total</th>
+                <th>Status</th>
+                <th>Rider</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for order in orders %}
+                <tr>
+                    <td>#{{ order.id }}</td>
+                    <td>
+                        {% if order.customer %}
+                            {{ order.customer.first_name }} {{ order.customer.last_name }}
+                        {% else %}
+                            Guest
+                        {% endif %}
+                    </td>
+                    <td>{{ order.items_count|default:0 }}</td>
+                    <td>₱{{ order.total_amount|default:0|floatformat:2 }}</td>
+                    <td>
+                        {% if order.status == 'pending' %}
+                            <span class="badge badge-warning">Pending</span>
+                        {% elif order.status == 'preparing' %}
+                            <span class="badge badge-info">Preparing</span>
+                        {% elif order.status == 'out_for_delivery' %}
+                            <span class="badge badge-info">Out for delivery</span>
+                        {% elif order.status == 'completed' %}
+                            <span class="badge badge-success">Completed</span>
+                        {% elif order.status == 'cancelled' %}
+                            <span class="badge badge-danger">Cancelled</span>
+                        {% else %}
+                            <span class="badge badge-muted">{{ order.get_status_display }}</span>
+                        {% endif %}
+                    </td>
+                    <td>Not assigned</td>
+                    <td>
+                        <form method="post" action="{% url 'admin_order_update_status' order.id %}" style="display: inline-flex; gap: 0.25rem; align-items: center;">
+                            {% csrf_token %}
+                            <select name="status" class="btn btn-small" style="padding: 0.25rem 0.5rem;">
+                                <option value="pending" {% if order.status == 'pending' %}selected{% endif %}>Pending</option>
+                                <option value="preparing" {% if order.status == 'preparing' %}selected{% endif %}>Preparing</option>
+                                <option value="out_for_delivery" {% if order.status == 'out_for_delivery' %}selected{% endif %}>Out for delivery</option>
+                                <option value="completed" {% if order.status == 'completed' %}selected{% endif %}>Completed</option>
+                                <option value="cancelled" {% if order.status == 'cancelled' %}selected{% endif %}>Cancelled</option>
+                            </select>
+                            <button type="submit" class="btn btn-primary btn-small">Update</button>
+                        </form>
+                    </td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="7" class="muted-text">No orders yet.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<p class="muted-text" style="margin-top: 0.75rem;">Statuses: Pending → Preparing → Out for delivery → Completed · or Cancelled.</p>
+{% endblock %}
+

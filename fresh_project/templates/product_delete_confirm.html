@@ -1,0 +1,26 @@
+{% extends 'admin_base.html' %}
+
+{% block title %}Delete product - Fresh Farm Admin{% endblock %}
+{% block nav_products_active %}active{% endblock %}
+{% block page_title %}Delete product{% endblock %}
+{% block page_subtitle %}This action cannot be undone{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Delete product</h1>
+    <p>Are you sure you want to delete <strong>{{ product.name }}</strong>? This cannot be undone.</p>
+</div>
+
+<div class="card" style="max-width: 420px;">
+    <form method="post">
+        {% csrf_token %}
+        <div class="muted-text" style="margin-bottom: 1rem;">
+            This will remove the product from the catalog. Existing orders that used this product will keep their data.
+        </div>
+        <div style="display:flex; gap:0.75rem;">
+            <button type="submit" class="btn btn-danger">Yes, delete</button>
+            <a href="{% url 'admin_products' %}" class="btn btn-outline">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% load static %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Admin - Fresh Farm System{% endblock %}</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #e8f5e8 0%, #f0f8f0 100%);
+            min-height: 100vh;
+            color: #2d1810;
+        }
+
+        .layout {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: 250px;
+            background-color: #2d1810;
+            color: #e8f5e8;
+            padding: 1.5rem 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+            transition: width 0.2s ease;
+        }
+
+        .layout.sidebar-collapsed .sidebar {
+            width: 72px;
+            padding-inline: 0.75rem;
+        }
+
+        .sidebar-logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #4CAF50;
+            white-space: nowrap;
+        }
+
+        .sidebar-logo span {
+            color: #e8f5e8;
+        }
+
+        .sidebar-logo-image {
+            height: 36px;
+            width: auto;
+            display: block;
+        }
+
+        .layout.sidebar-collapsed .sidebar-logo span:last-child {
+            display: none;
+        }
+
+        .sidebar-nav {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .nav-label {
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.08em;
+            color: #a5b3a5;
+            margin-bottom: 0.5rem;
+            padding: 0 0.75rem;
+        }
+
+        .layout.sidebar-collapsed .nav-label {
+            display: none;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.7rem 0.9rem;
+            border-radius: 8px;
+            text-decoration: none;
+            color: #e8f5e8;
+            font-size: 0.95rem;
+            font-weight: 500;
+            transition: background-color 0.2s, transform 0.1s;
+        }
+
+        .nav-link:hover {
+            background-color: #3a2419;
+            transform: translateX(2px);
+        }
+
+        .nav-link.active {
+            background-color: #4CAF50;
+            color: #2d1810;
+        }
+
+        .nav-icon {
+            width: 1.6rem;
+            text-align: center;
+        }
+
+        .layout.sidebar-collapsed .nav-link {
+            justify-content: center;
+        }
+
+        .layout.sidebar-collapsed .nav-link span:nth-child(2) {
+            display: none;
+        }
+
+        .main-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .topbar {
+            background-color: #ffffff;
+            padding: 1rem 1.75rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .topbar-left {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .topbar-title {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .sidebar-toggle {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 34px;
+            height: 34px;
+            border-radius: 999px;
+            border: 1px solid #d0d0d0;
+            background-color: #ffffff;
+            cursor: pointer;
+            font-size: 1.1rem;
+            color: #2d1810;
+            transition: background-color 0.2s, box-shadow 0.2s, transform 0.1s;
+        }
+
+        .sidebar-toggle:hover {
+            background-color: #f3f3f3;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+            transform: translateY(-1px);
+        }
+
+        .topbar-label {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #2d1810;
+        }
+
+        .topbar-subtitle {
+            font-size: 0.9rem;
+            color: #767676;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: #4CAF50;
+        }
+
+        .admin-badge {
+            background-color: #ff6b6b;
+            color: #ffffff;
+            padding: 0.25rem 0.7rem;
+            border-radius: 999px;
+            font-size: 0.75rem;
+            font-weight: bold;
+        }
+
+        .logout-btn {
+            background-color: #4CAF50;
+            color: #2d1810;
+            padding: 0.5rem 1rem;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: background-color 0.2s, transform 0.1s, box-shadow 0.2s;
+        }
+
+        .logout-btn:hover {
+            background-color: #66BB6A;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 10px rgba(76, 175, 80, 0.25);
+        }
+
+        .content-wrapper {
+            padding: 1.5rem 1.75rem 2.5rem;
+        }
+
+        .page-header {
+            margin-bottom: 1.5rem;
+        }
+
+        .page-header h1 {
+            font-size: 1.6rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .page-header p {
+            color: #666;
+            font-size: 0.98rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .stat-card {
+            background-color: #ffffff;
+            border-radius: 12px;
+            padding: 1rem 1.25rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+            border-top: 3px solid #4CAF50;
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            color: #777;
+            margin-bottom: 0.35rem;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.2rem;
+        }
+
+        .stat-sub {
+            font-size: 0.85rem;
+            color: #999;
+        }
+
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .card {
+            background-color: #ffffff;
+            border-radius: 12px;
+            padding: 1.25rem 1.5rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 0.75rem;
+        }
+
+        .card-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .card-meta {
+            font-size: 0.85rem;
+            color: #888;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.55rem 1rem;
+            border-radius: 999px;
+            border: none;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: background-color 0.2s, box-shadow 0.2s, transform 0.1s;
+        }
+
+        .btn-primary {
+            background-color: #4CAF50;
+            color: #2d1810;
+        }
+
+        .btn-primary:hover {
+            background-color: #66BB6A;
+            box-shadow: 0 4px 10px rgba(76,175,80,0.25);
+            transform: translateY(-1px);
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            color: #2d1810;
+            border: 1px solid #d0d0d0;
+        }
+
+        .btn-outline:hover {
+            background-color: #f5f5f5;
+        }
+
+        .btn-danger {
+            background-color: #ff6b6b;
+            color: #ffffff;
+        }
+
+        .btn-danger:hover {
+            background-color: #ff4c4c;
+        }
+
+        .btn-small {
+            padding: 0.35rem 0.75rem;
+            font-size: 0.8rem;
+        }
+
+        .table-wrapper {
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        thead {
+            background-color: #f5f5f5;
+        }
+
+        th, td {
+            padding: 0.6rem 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid #ececec;
+            white-space: nowrap;
+        }
+
+        th {
+            font-weight: 600;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #777;
+        }
+
+        tbody tr:hover {
+            background-color: #fafafa;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.15rem 0.6rem;
+            border-radius: 999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .badge-success {
+            background-color: #e0f6e5;
+            color: #1b7a32;
+        }
+
+        .badge-warning {
+            background-color: #fff5d5;
+            color: #996c00;
+        }
+
+        .badge-info {
+            background-color: #e3f2fd;
+            color: #1565c0;
+        }
+
+        .badge-danger {
+            background-color: #fde2e2;
+            color: #b71c1c;
+        }
+
+        .badge-muted {
+            background-color: #eeeeee;
+            color: #666666;
+        }
+
+        .chart-placeholder {
+            height: 160px;
+            display: flex;
+            align-items: flex-end;
+            gap: 0.5rem;
+        }
+
+        .chart-bar {
+            flex: 1;
+            background: linear-gradient(180deg, #66BB6A, #4CAF50);
+            border-radius: 6px 6px 0 0;
+        }
+
+        .chart-bar.muted {
+            opacity: 0.5;
+        }
+
+        .chart-axis {
+            margin-top: 0.5rem;
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.75rem;
+            color: #888;
+        }
+
+        .toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .search-input {
+            padding: 0.5rem 0.75rem;
+            border-radius: 999px;
+            border: 1px solid #d0d0d0;
+            min-width: 220px;
+            font-size: 0.9rem;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #4CAF50;
+            box-shadow: 0 0 0 3px rgba(76,175,80,0.12);
+        }
+
+        .pill-filters {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .pill {
+            padding: 0.3rem 0.75rem;
+            border-radius: 999px;
+            border: 1px solid #d0d0d0;
+            font-size: 0.8rem;
+            cursor: pointer;
+            background-color: #ffffff;
+        }
+
+        .pill.active {
+            background-color: #4CAF50;
+            color: #2d1810;
+            border-color: #4CAF50;
+        }
+
+        /* Category pills (All, Fruits, Vegetables) - yellow theme */
+        .pill-category {
+            border-color: #FFC107;
+            color: #b33b00;
+            font-weight: 600;
+        }
+
+        .pill-category.active {
+            background-color: #FFC107;
+            color: #b33b00;
+            border-color: #FFC107;
+        }
+
+        .split {
+            display: grid;
+            grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+            gap: 1.5rem;
+        }
+
+        .muted-text {
+            font-size: 0.85rem;
+            color: #777;
+        }
+
+        .messages {
+            margin-bottom: 1.5rem;
+        }
+
+        .alert {
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            font-weight: 500;
+        }
+
+        .alert-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        @media (max-width: 768px) {
+            .topbar {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.75rem;
+            }
+
+            .split {
+                grid-template-columns: 1fr;
+            }
+
+            .card-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+ </head>
+<body>
+    <div class="layout" id="admin-layout">
+        <aside class="sidebar">
+            <div class="sidebar-logo">
+                <img src="{% static 'images/Fresh_Farm.png.jpg' %}" alt="Fresh Farm logo" class="sidebar-logo-image">
+                <span>Fresh Farm Admin</span>
+            </div>
+            <nav class="sidebar-nav">
+                <div class="nav-label">Main</div>
+                <a href="{% url 'admin_dashboard' %}" class="nav-link {% block nav_dashboard_active %}{% endblock %}">
+                    <span class="nav-icon">📊</span>
+                    <span>Dashboard</span>
+                </a>
+                <a href="{% url 'admin_products' %}" class="nav-link {% block nav_products_active %}{% endblock %}">
+                    <span class="nav-icon">🥬</span>
+                    <span>Products</span>
+                </a>
+                <a href="{% url 'admin_orders' %}" class="nav-link {% block nav_orders_active %}{% endblock %}">
+                    <span class="nav-icon">📦</span>
+                    <span>Orders</span>
+                </a>
+                <a href="{% url 'admin_customers' %}" class="nav-link {% block nav_customers_active %}{% endblock %}">
+                    <span class="nav-icon">👥</span>
+                    <span>Customers</span>
+                </a>
+                <a href="{% url 'admin_reports' %}" class="nav-link {% block nav_reports_active %}{% endblock %}">
+                    <span class="nav-icon">📈</span>
+                    <span>Reports</span>
+                </a>
+            </nav>
+        </aside>
+
+        <div class="main-area">
+            <header class="topbar">
+                <div class="topbar-left">
+                    <button type="button" class="sidebar-toggle" id="sidebarToggle" aria-label="Toggle sidebar">☰</button>
+                    <div class="topbar-title">
+                        <div class="topbar-label">{% block page_title %}Dashboard{% endblock %}</div>
+                        <div class="topbar-subtitle">{% block page_subtitle %}Overview of your farm operations{% endblock %}</div>
+                    </div>
+                </div>
+                <div class="user-info">
+                    <span class="admin-badge">ADMIN</span>
+                    <span>Welcome, {{ user.first_name }} {{ user.last_name }}!</span>
+                    <a href="{% url 'logout' %}" class="logout-btn">Logout</a>
+                </div>
+            </header>
+
+            <main class="content-wrapper">
+                {% if messages %}
+                    <div class="messages">
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }}">
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
+                {% block content %}{% endblock %}
+            </main>
+        </div>
+    </div>
+    <script>
+        (function() {
+            var layout = document.getElementById('admin-layout');
+            var toggle = document.getElementById('sidebarToggle');
+            if (!layout || !toggle) return;
+
+            // Start collapsed by default on small screens
+            if (window.innerWidth <= 768) {
+                layout.classList.add('sidebar-collapsed');
+            }
+
+            toggle.addEventListener('click', function () {
+                layout.classList.toggle('sidebar-collapsed');
+            });
+        })();
+    </script>
+</body>
+</html>

@@ -1,0 +1,56 @@
+{% extends 'customer_base.html' %}
+
+{% block title %}My Orders - Fresh Farm System{% endblock %}
+{% block nav_orders_active %}active{% endblock %}
+{% block page_title %}My Orders{% endblock %}
+{% block page_subtitle %}View your active orders and order history{% endblock %}
+
+{% block content %}
+    <div class="page-header">
+        <p>Track your active orders and review your past purchases.</p>
+    </div>
+
+    <section class="card">
+        <div class="card-header">
+            <h2 class="card-title">All orders</h2>
+        </div>
+        <div class="toolbar" style="margin-bottom: 0.75rem;">
+            <div class="pill-filters">
+                <a href="{% url 'customer_orders' %}?status=all" class="pill{% if status_filter == 'all' %} active{% endif %}">All</a>
+                <a href="{% url 'customer_orders' %}?status=pending" class="pill{% if status_filter == 'pending' %} active{% endif %}">Pending</a>
+                <a href="{% url 'customer_orders' %}?status=preparing" class="pill{% if status_filter == 'preparing' %} active{% endif %}">Preparing</a>
+                <a href="{% url 'customer_orders' %}?status=out_for_delivery" class="pill{% if status_filter == 'out_for_delivery' %} active{% endif %}">Out for delivery</a>
+                <a href="{% url 'customer_orders' %}?status=completed" class="pill{% if status_filter == 'completed' %} active{% endif %}">Completed</a>
+                <a href="{% url 'customer_orders' %}?status=cancelled" class="pill{% if status_filter == 'cancelled' %} active{% endif %}">Cancelled</a>
+            </div>
+        </div>
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Placed</th>
+                        <th>Items</th>
+                        <th>Total</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for order in orders %}
+                        <tr>
+                            <td>#{{ order.id }}</td>
+                            <td>{{ order.created_at|date:"Y-m-d H:i" }}</td>
+                            <td>{{ order.items_count|default:0 }}</td>
+                            <td>₱{{ order.total_amount|default:0|floatformat:2 }}</td>
+                            <td>{{ order.get_status_display }}</td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="5" class="muted-text">You don't have any orders yet.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+{% endblock %}

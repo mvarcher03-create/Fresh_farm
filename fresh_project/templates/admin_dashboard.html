@@ -1,0 +1,113 @@
+{% extends 'admin_base.html' %}
+
+{% block title %}Admin Dashboard - Fresh Farm System{% endblock %}
+{% block nav_dashboard_active %}active{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+{% block page_subtitle %}Today's key numbers and recent activity{% endblock %}
+
+{% block content %}
+    <div class="page-header">
+        <h1>Today at a glance</h1>
+        <p>Only the essentials you need right now.</p>
+    </div>
+
+    <section class="stats-grid">
+        <article class="stat-card">
+            <div class="stat-label">Today's Sales</div>
+            <div class="stat-value">₱{{ todays_sales|default:0|floatformat:2 }}</div>
+            <div class="stat-sub">Completed order revenue for today</div>
+        </article>
+
+        <article class="stat-card">
+            <div class="stat-label">Total Orders Today</div>
+            <div class="stat-value">{{ total_orders_today }}</div>
+            <div class="stat-sub">All orders created today</div>
+        </article>
+
+        <article class="stat-card">
+            <div class="stat-label">Pending Orders</div>
+            <div class="stat-value">{{ pending_orders_count }}</div>
+            <div class="stat-sub">Waiting to be prepared</div>
+        </article>
+
+        <article class="stat-card">
+            <div class="stat-label">Low-stock items</div>
+            <div class="stat-value">{{ low_stock_items_count }}</div>
+            <div class="stat-sub">With stock at or below {{ low_stock_threshold }} kg</div>
+        </article>
+    </section>
+
+    <section class="split" style="margin-top: 1.5rem;">
+        <article class="card">
+            <div class="card-header">
+                <h2 class="card-title">Sales chart</h2>
+                <span class="card-meta">Last 7 days</span>
+            </div>
+            <div class="chart-placeholder">
+                {% for point in chart_points %}
+                    <div class="chart-bar{% if point.total == 0 %} muted{% endif %}" style="height: {{ point.percent }}%;"></div>
+                {% endfor %}
+            </div>
+            <div class="chart-axis">
+                {% for point in chart_points %}
+                    <span>{{ point.label }}</span>
+                {% endfor %}
+            </div>
+        </article>
+
+        <article class="card">
+            <div class="card-header">
+                <h2 class="card-title">Recent 5 orders</h2>
+                <span class="card-meta">Quick view only</span>
+            </div>
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Customer</th>
+                            <th>Total</th>
+                            <th>Status</th>
+                            <th>Placed</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for order in recent_orders %}
+                            <tr>
+                                <td>#{{ order.id }}</td>
+                                <td>
+                                    {% if order.customer %}
+                                        {{ order.customer.first_name }} {{ order.customer.last_name }}
+                                    {% else %}
+                                        Guest
+                                    {% endif %}
+                                </td>
+                                <td>₱{{ order.total_amount|default:0|floatformat:2 }}</td>
+                                <td>
+                                    {% if order.status == 'pending' %}
+                                        <span class="badge badge-warning">Pending</span>
+                                    {% elif order.status == 'preparing' %}
+                                        <span class="badge badge-info">Preparing</span>
+                                    {% elif order.status == 'out_for_delivery' %}
+                                        <span class="badge badge-info">Out for delivery</span>
+                                    {% elif order.status == 'completed' %}
+                                        <span class="badge badge-success">Completed</span>
+                                    {% elif order.status == 'cancelled' %}
+                                        <span class="badge badge-danger">Cancelled</span>
+                                    {% else %}
+                                        <span class="badge badge-muted">{{ order.get_status_display }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ order.created_at|timesince }} ago</td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="5" class="muted-text">No orders yet.</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </article>
+    </section>
+{% endblock %}

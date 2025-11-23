@@ -1,0 +1,55 @@
+{% extends 'customer_base.html' %}
+
+{% block title %}Customer Dashboard - Fresh Farm System{% endblock %}
+{% block nav_dashboard_active %}active{% endblock %}
+{% block page_title %}Customer Dashboard{% endblock %}
+{% block page_subtitle %}Manage your farm orders and explore fresh products{% endblock %}
+
+{% block content %}
+    <div class="page-header">
+        <h1>🌱 Customer Dashboard</h1>
+        <p>Welcome back! Manage your farm orders and explore fresh products.</p>
+    </div>
+
+    <section class="stats-grid">
+        <article class="stat-card">
+            <div class="icon">🥬</div>
+            <h3>{{ total_orders|default:0 }}</h3>
+            <p>Total Orders</p>
+        </article>
+
+        <article class="stat-card">
+            <div class="icon">🚚</div>
+            <h3>{{ pending_deliveries|default:0 }}</h3>
+            <p>Pending Deliveries</p>
+        </article>
+
+        <article class="stat-card">
+            <div class="icon">⭐</div>
+            <h3>{{ completed_orders|default:0 }}</h3>
+            <p>Completed Orders</p>
+        </article>
+
+        <article class="stat-card">
+            <div class="icon">💰</div>
+            <h3>₱{{ total_spent|default:0|floatformat:2 }}</h3>
+            <p>Total Spent</p>
+        </article>
+    </section>
+
+    <section class="card-grid" style="margin-top: 1.5rem;">
+        <article class="card">
+            <div class="card-header">
+                <h2 class="card-title">🛒 Browse Products</h2>
+            </div>
+            <a href="{% url 'shop_now' %}" class="btn btn-primary">Shop Now</a>
+        </article>
+
+        <article class="card">
+            <div class="card-header">
+                <h2 class="card-title">📦 My Orders</h2>
+            </div>
+            <a href="{% url 'customer_orders' %}" class="btn btn-primary">View Orders</a>
+        </article>
+    </section>
+{% endblock %}

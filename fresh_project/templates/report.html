@@ -1,0 +1,77 @@
+{% extends 'admin_base.html' %}
+
+{% block title %}Reports - Fresh Farm Admin{% endblock %}
+{% block nav_reports_active %}active{% endblock %}
+{% block page_title %}Reports{% endblock %}
+{% block page_subtitle %}Daily, weekly, and monthly sales at a glance{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Reports</h1>
+    <p>Minimal reports focused on what matters most.</p>
+</div>
+
+<section class="stats-grid">
+    <article class="stat-card">
+        <div class="stat-label">Daily sales</div>
+        <div class="stat-value">₱{{ daily_sales|default:0|floatformat:2 }}</div>
+        <div class="stat-sub">Today</div>
+    </article>
+
+    <article class="stat-card">
+        <div class="stat-label">Weekly sales</div>
+        <div class="stat-value">₱{{ weekly_sales|default:0|floatformat:2 }}</div>
+        <div class="stat-sub">Last 7 days</div>
+    </article>
+
+    <article class="stat-card">
+        <div class="stat-label">Monthly sales</div>
+        <div class="stat-value">₱{{ monthly_sales|default:0|floatformat:2 }}</div>
+        <div class="stat-sub">This month</div>
+    </article>
+</section>
+
+<section class="card-grid" style="margin-top: 1.5rem;">
+    <article class="card">
+        <div class="card-header">
+            <h2 class="card-title">Top-selling products</h2>
+            <span class="card-meta">{{ period_label }}</span>
+        </div>
+        <form method="get" class="simple-filter-form">
+            <div class="toolbar" style="margin-top: 0.75rem;">
+                <input type="date" name="start" value="{{ report_start }}">
+                <input type="date" name="end" value="{{ report_end }}">
+                <button type="submit" class="btn btn-outline btn-small">Apply</button>
+                <a href="{% url 'admin_reports' %}" class="btn btn-outline btn-small">Reset</a>
+            </div>
+        </form>
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th>Category</th>
+                        <th>Kg sold</th>
+                        <th>Revenue (₱)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for product in top_products %}
+                        <tr>
+                            <td>{{ product.product_name }}</td>
+                            <td>{{ product.product_category }}</td>
+                            <td>{{ product.total_quantity|default:0 }}</td>
+                            <td>₱{{ product.total_revenue|default:0|floatformat:2 }}</td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="4" class="muted-text">No sales yet for this period.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </article>
+</section>
+{% endblock %}
+

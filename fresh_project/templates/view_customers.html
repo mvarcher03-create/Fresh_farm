@@ -1,0 +1,63 @@
+{% extends 'admin_base.html' %}
+
+{% block title %}Customers - Fresh Farm Admin{% endblock %}
+{% block nav_customers_active %}active{% endblock %}
+{% block page_title %}Customers{% endblock %}
+{% block page_subtitle %}View customers and quickly access their order history{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Customers</h1>
+    <p>Only the essentials: who they are and what they ordered.</p>
+</div>
+
+<div class="toolbar">
+    <input type="text" class="search-input" placeholder="Search customers by name or email">
+</div>
+
+<div class="table-wrapper">
+    <table>
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Total orders</th>
+                <th>Total spent</th>
+                <th>Last order</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for customer in customers %}
+                <tr>
+                    <td>
+                        {% if customer.first_name or customer.last_name %}
+                            {{ customer.first_name }} {{ customer.last_name }}
+                        {% else %}
+                            {{ customer.username }}
+                        {% endif %}
+                    </td>
+                    <td>{{ customer.email }}</td>
+                    <td>{{ customer.total_orders|default:0 }}</td>
+                    <td>₱{{ customer.total_spent|default:0|floatformat:2 }}</td>
+                    <td>
+                        {% if customer.last_order_date %}
+                            {{ customer.last_order_date|timesince }} ago
+                        {% else %}
+                            No orders yet
+                        {% endif %}
+                    </td>
+                    <td>
+                        <button class="btn btn-outline btn-small" type="button">View history</button>
+                    </td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="6" class="muted-text">No customers found.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
+
