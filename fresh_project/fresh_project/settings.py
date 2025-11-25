@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-1exzj*o*qm*5_(1rua+x$^=alew7^@khx@c!4zbmadunxi7h81
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'fresh-farm-2svv.onrender.com']
 
 
 # Application definition
@@ -37,7 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'fresh_app',
+    'fresh_app.apps.FreshAppConfig',
 ]
 
 MIDDLEWARE = [
