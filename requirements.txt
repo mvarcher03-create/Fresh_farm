@@ -1,0 +1,5 @@
+Django==5.2.8
+gunicorn==23.0.0
+whitenoise==6.11.0
+Pillow==10.3.0  # If you're using image fields
+psycopg2-binary==2.9.9  # If you're using PostgreSQL
